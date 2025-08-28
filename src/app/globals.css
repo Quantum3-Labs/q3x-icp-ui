@@ -48,3 +48,62 @@ body {
 html {
   font-family: var(--font-barlow), system-ui, sans-serif;
 }
+
+/************ Custom Checkbox ************/
+.custom-checkbox {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+.custom-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 16px;
+  width: 16px;
+  z-index: 1;
+}
+
+.custom-checkbox .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  background: #e0e0e0;
+  border: 1px solid #adadad;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox:hover .checkmark {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.custom-checkbox input[type="checkbox"]:checked ~ .checkmark {
+  background: #e0e0e0;
+  border: 1px solid #adadad;
+}
+
+.custom-checkbox .checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 50%;
+  top: 50%;
+  transform: translate(-40%, -60%);
+  width: 19px;
+  height: 19px;
+  background-image: url("/misc/custom-check-icon.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+}
+
+.custom-checkbox input[type="checkbox"]:checked ~ .checkmark::after {
+  display: block;
+}
+/************ Custom Checkbox ************/

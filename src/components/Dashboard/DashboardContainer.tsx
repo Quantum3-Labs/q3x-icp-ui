@@ -40,7 +40,7 @@ function Header() {
 
 export default function DashboardContainer() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 p-2">
       <div className="flex flex-row h-[100px] w-full justify-between">
         <div className="w-full relative">
           <img src="/misc/clock.svg" alt="clock" className="w-[150px]" />
