@@ -69,7 +69,7 @@ const SectionItem = ({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col">
-        <span className="text-lg font-bold text-text-primary">{label}</span>
+        <span className="text-lg font-bold text-text-primary uppercase">{label}</span>
         <span className="text-sm text-text-secondary">{description}</span>
       </div>
       <div className="flex flex-col gap-0.5">

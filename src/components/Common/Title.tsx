@@ -11,6 +11,9 @@ const Title: React.FC = () => {
     case "/dashboard":
       title = "Dashboard";
       break;
+    case "/dashboard/new-account":
+      title = "Create New Account";
+      break;
     case "/address-book":
       title = "Address Book";
       break;
@@ -18,6 +21,17 @@ const Title: React.FC = () => {
       title = "AI Assistant";
       break;
     case "/send":
+      title = "Send Token";
+      break;
+    case "/swap":
+      title = "Swap Token";
+      break;
+    case "/batch":
+      title = "Your Batch";
+      break;
+    case "/transactions":
+      title = "Transactions";
+      break;
   }
 
   return (

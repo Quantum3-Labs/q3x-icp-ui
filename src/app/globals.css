@@ -49,6 +49,27 @@ html {
   font-family: var(--font-barlow), system-ui, sans-serif;
 }
 
+/* Hide scrollbar for webkit browsers */
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for webkit browsers */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.overflow-y-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overflow-x-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /************ Custom Checkbox ************/
 .custom-checkbox {
   position: relative;
@@ -107,3 +128,37 @@ html {
   display: block;
 }
 /************ Custom Checkbox ************/
+
+/************** Animations **************/
+
+/****** Transaction Summary *******/
+@keyframes transaction-summary-slide-in {
+  from {
+    width: 0px;
+    opacity: 0;
+  }
+  to {
+    width: 400px;
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: transaction-summary-slide-in 0.3s ease-out forwards;
+}
+
+@keyframes transaction-summary-slide-out {
+  from {
+    width: 400px;
+    opacity: 1;
+  }
+  to {
+    width: 0px;
+    opacity: 0;
+  }
+}
+
+.animate-slide-out {
+  animation: transaction-summary-slide-out 0.3s ease-out forwards;
+}
+/****** Transaction Summary *******/
