@@ -56,7 +56,7 @@ export default function RootLayout({
         className={`${barlow.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
-          defaultTheme="system"
+          defaultTheme="light"
           storageKey="ui-theme"
         >
           <ClientLayout>      
