@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AccountSidebar from "../Account/AccountSidebar";
+import PrimaryButton from "./Button/PrimaryButton";
 
 export const ACCOUNT_SIDEBAR_OFFSET = 285; // Main sidebar width
 export const NEW_SUB_ACCOUNT_SIDEBAR_OFFSET = 567; // Account sidebar width + gap
@@ -121,7 +122,9 @@ const SectionItem = ({
 };
 
 export default function Sidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname();  
+  // Just for testing
+  const [connected, setConnected] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [showAccountSidebar, setShowAccountSidebar] = useState(false);
 
@@ -140,7 +143,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="bg-background relative rounded-lg h-screen min-w-[280px] max-w-[280px] justify-between flex flex-col z-30 border border-[#EDEDED]">
+      <div className="bg-background relative rounded-lg h-screen min-w-[280px] max-w-[280px] justify-between flex flex-col z-30 border border-[#EDEDED] py-1">
         <div className="p-3">
           {/* Header */}
           <div className="flex flex-row items-center gap-3">
@@ -170,7 +173,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-1">
           {/* Request new feature */}
           <div className="px-3">
             <div className="flex flex-row items-center gap-2">
@@ -185,7 +188,9 @@ export default function Sidebar() {
 
           {/* Account */}
           <div className="flex flex-col">
-            <div
+            {connected ? (
+              <>
+              <div
               className="flex items-center px-4 py-3 justify-between bg-surface-blue cursor-pointer hover:bg-surface-blue/80 transition-colors"
               onClick={handleAccountClick}
             >
@@ -205,6 +210,10 @@ export default function Sidebar() {
                 <span className="text-text-primary">Free</span>
               </div>
             </div>
+              </>
+            ) : (
+              <PrimaryButton onClick={() => setConnected(true)} text="Connect your account" />
+            )}
           </div>
         </div>
       </div>
