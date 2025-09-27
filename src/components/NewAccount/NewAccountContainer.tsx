@@ -110,7 +110,6 @@ export default function NewAccountContainer() {
   };
 
   const handleSignersNext = (data: WalletData) => {
-    console.log("🚀 ~ handleSignersNext ~ data:", data);
     setWalletData(data);
     setCurrentStep(3); // Will be create wallet step
   };

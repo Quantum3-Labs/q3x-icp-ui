@@ -19,7 +19,9 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
 }) => {
   const { principal } = useInternetIdentity();
   const [signers, setSigners] = useState<SignerData>(initialSigners);
+  console.log("🚀 ~ SignersConfirmations ~ signers:", signers);
   const [threshold, setThreshold] = useState(initialThreshold);
+  const [duplicateErrors, setDuplicateErrors] = useState<boolean[]>([]);
 
   const isValid = signers.every(s => threshold >= 1 && threshold <= signers.length);
 
@@ -31,6 +33,20 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
     const newSigners = [...signers];
     newSigners[index][field] = value;
     setSigners(newSigners);
+
+    // check duplicate
+    if (field === "address" && value.trim()) {
+      const isDuplicate = newSigners.some((signer, i) => i !== index && signer.address.trim() === value.trim());
+
+      if (isDuplicate) {
+        const newErrors = [...duplicateErrors];
+        const isDuplicate = newSigners.some(
+          (signer, i) => i !== index && signer.address.trim() === value.trim() && value.trim() !== "",
+        );
+        newErrors[index] = isDuplicate;
+        setDuplicateErrors(newErrors);
+      }
+    }
   };
 
   const handleRemoveSigner = (index: number) => {
@@ -44,6 +60,17 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
 
   // TODO: rename
   const handleNextClick = () => {
+    // Get all non-empty addresses
+    const addresses = signers.map(s => s.address.trim()).filter(addr => addr !== "");
+
+    // Check for duplicates
+    const hasDuplicates = addresses.some((address, index) => addresses.indexOf(address) !== index);
+
+    if (hasDuplicates) {
+      alert("Please remove duplicate signer addresses before proceeding.");
+      return;
+    }
+
     if (isValid) {
       onNextStep({ signers: signers.filter(s => s.address.trim()), threshold });
     }
@@ -92,16 +119,6 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
           <div className="flex flex-col gap-3">
             {signers.map((signer, index) => (
               <div key={index} className="flex gap-2 items-center">
-                {/* <input
-                  type="text"
-                  placeholder="Signer name"
-                  value={signer.name}
-                  onChange={e => {
-                    handleSignerChange(index, "name", e.target.value);
-                    handleNextClick();
-                  }}
-                  className="w-32 p-3 bg-white border border-[#e0e0e0] rounded-[16px] text-[16px] outline-none"
-                /> */}
                 {index === 0 ? (
                   <>
                     <input
@@ -128,7 +145,9 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
                         handleSignerChange(index, "address", e.target.value);
                         handleNextClick();
                       }}
-                      className="flex-1 p-3 bg-white border border-[#e0e0e0] rounded-[16px] text-[16px] outline-none"
+                      className={`flex-1 p-3 bg-white border rounded-[16px] text-[16px] outline-none ${
+                        duplicateErrors[index] ? "border-red-500 bg-red-50" : "border-[#e0e0e0]"
+                      }`}
                     />
                     <button
                       onClick={() => handleRemoveSigner(index)}
@@ -170,7 +189,7 @@ const SignersConfirmations: React.FC<SignersConfirmationsProps> = ({
               onChange={e => {
                 const value = Number(e.target.value);
                 setThreshold(value);
-                onNextStep({signers: signers.filter(s => s.address.trim()), threshold: value});
+                onNextStep({ signers: signers.filter(s => s.address.trim()), threshold: value });
               }}
               className="w-20 p-3 bg-white border border-[#e0e0e0] rounded-[16px] text-[16px] outline-none text-center"
             />
