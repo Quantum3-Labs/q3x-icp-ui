@@ -1,0 +1,1 @@
+export { useInternetIdentity } from '@/contexts/InternetIdentityContext';

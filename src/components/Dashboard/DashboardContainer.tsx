@@ -1,9 +1,24 @@
 "use client";
 
 import InfoCardContainer from "./InfoCardContainer";
-import React from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import TransactionRow from "./TransactionRow";
 import { TransactionType } from "./TransactionRow";
+import { useWalletCanister } from "@/hooks/useWalletCanister";
+import { useInternetIdentity } from "@/hooks/useInternetIdentity";
+import { MessageType, parseMessageQueue, PendingMessage } from "@/utils/messages";
+import { stringToHex } from "@/utils/helper";
+import { on } from "events";
+import { getWalletByCanisterId, getWalletsByPrincipal, Wallet } from "@/services/api";
+import { useSearchParams } from "next/navigation";
+import { CurrentWalletContext, useCurrentWallet } from "@/contexts/CurrentWalletContext";
+
+export interface WalletData {
+  signers: string[];
+  threshold: number;
+  message_queue: any[];
+  metadata: any[];
+}
 
 // Header Component
 function Header() {
@@ -39,6 +54,158 @@ function Header() {
 }
 
 export default function DashboardContainer() {
+  const searchParams = useSearchParams();
+  const canisterIdFromUrl = searchParams.get("canisterid");
+  const [currentWallet, setCurrentWallet] = useState<Wallet | null>(null);
+  const { isAuthenticated, identity, principal } = useInternetIdentity();
+  const { actor, getWallet, approveMessage, checkCanSign, signMessage, initializeActorWithCanister } =
+    useWalletCanister();
+  const [walletData, setWalletData] = useState<WalletData[]>([]);
+  const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWalletData = async () => {
+      setLoading(true);
+      if (canisterIdFromUrl) {
+        const wallet = await getWalletByCanisterId(canisterIdFromUrl);
+        setCurrentWallet(wallet);
+
+        if (identity) {
+          initializeActorWithCanister(canisterIdFromUrl);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchWalletData();
+  }, [canisterIdFromUrl]);
+
+  // TODO: Find a better way to map message type to transaction type
+  const getTransactionType = (messageType: MessageType): TransactionType => {
+    switch (messageType) {
+      case MessageType.ADD_SIGNER:
+        return TransactionType.ADD_SIGNER;
+      case MessageType.REMOVE_SIGNER:
+        return TransactionType.REMOVE_SIGNER;
+      case MessageType.SET_THRESHOLD:
+        return TransactionType.THRESHOLD;
+      case MessageType.TRANSFER:
+        return TransactionType.SEND;
+      default:
+        return TransactionType.ADD_SIGNER;
+    }
+  };
+
+  // TODO: find a better way to map message to transaction props
+  const getTransactionProps = (message: PendingMessage) => {
+    const baseProps = {
+      type: getTransactionType(message.type),
+      showButtons: message.needsApproval,
+      showChevron: false, // TODO: have expanded content for certain types
+      showExternalLink: !message.needsApproval,
+      approveNumber: message.approveNumber,
+      isApproved: Boolean(
+        principal && message.signers && message.signers.length > 0 && message.signers.map(s => s.toString()).includes(principal),
+      ),
+      oldThreshold: walletData[0].threshold,
+      status: message.needsApproval ? undefined : ("success" as const),
+      onApprove: () => handleApprove(message.rawMessage),
+    };
+
+    switch (message.type) {
+      case MessageType.ADD_SIGNER:
+        return {
+          ...baseProps,
+          signers: [message.data.substring(0, 10) + "..."], // Truncate principal for display
+        };
+
+      case MessageType.REMOVE_SIGNER:
+        return {
+          ...baseProps,
+          signers: [message.data.substring(0, 10) + "..."],
+        };
+
+      case MessageType.SET_THRESHOLD:
+        return {
+          ...baseProps,
+          newThreshold: message.data,
+        };
+
+      case MessageType.TRANSFER:
+        // Parse transfer data: "amount::recipient" hoặc similar format
+        const transferParts = message.data.split("::");
+        return {
+          ...baseProps,
+          amount: transferParts[0] || "Transfer",
+          to: transferParts[1]?.substring(0, 10) + "..." || "Unknown",
+        };
+
+      default:
+        return baseProps;
+    }
+  };
+
+  const handleApprove = async (messageId: string) => {
+    try {
+      setLoading(true);
+      const messageHex = stringToHex(messageId);
+
+      // Step 1: Approve the message
+      await approveMessage(getWalletId, messageHex);
+
+      // Step 2: Check if we can sign (threshold reached)
+      const canSign = await checkCanSign(getWalletId, messageHex);
+
+      if (canSign) {
+        // Step 3: Auto sign if threshold is met
+        await signMessage(getWalletId, messageHex);
+      }
+
+      // Step 4: Refresh wallet data to update UI
+      setLoading(false);
+      refreshWalletData();
+    } catch (error) {
+      console.log("Failed in approve flow:", error);
+      alert(`Failed to approve: ${error}`);
+      refreshWalletData();
+    }
+  };
+
+  const fetchWalletData = async () => {
+    try {
+      setLoading(true);
+      const data = await getWallet(currentWallet?.name || "");
+      if (data) {
+        setWalletData(data);
+
+        // Parse message queue
+        const messages = parseMessageQueue(data[0]?.message_queue, data[0]?.threshold);
+        setPendingMessages(messages);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.log("Failed to fetch wallet:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TODO: not want to call 2 times
+  const refreshWalletData = async () => {
+    await fetchWalletData();
+  };
+
+  useEffect(() => {
+    if (actor && currentWallet?.name) {
+      fetchWalletData();
+    }
+  }, [currentWallet?.name, actor]);
+
+  const getWalletId = useMemo(() => {
+    return currentWallet?.name || "wallet-1";
+  }, [currentWallet?.name]);
+
   return (
     <div className="flex flex-col gap-5 p-2">
       <div className="flex flex-row h-[100px] w-full justify-between">
@@ -46,58 +213,30 @@ export default function DashboardContainer() {
           <img src="/misc/clock.svg" alt="clock" className="w-[150px]" />
           <div className="absolute -bottom-5 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
         </div>
-        <InfoCardContainer />
+        <InfoCardContainer
+          walletData={walletData}
+          walletName={currentWallet?.name}
+          onUpdate={refreshWalletData}
+          pendingTransaction={pendingMessages?.length}
+          loading={loading}
+        />
       </div>
 
       {/* header */}
       <Header />
 
       {/* body */}
-      <div className="content-stretch flex flex-col gap-0.5 items-start justify-start relative size-full">
-        <TransactionRow
-          type={TransactionType.SEND}
-          amount="$1,000,000,000 USDT"
-          to="Tim Cook"
-          showButtons={true}
-          showChevron={true}
-        />
-
-        <TransactionRow
-          type={TransactionType.SWAP}
-          amount="$1,000,000,000 USDT"
-          to="10 BTC"
-          showButtons={true}
-          showChevron={true}
-        />
-
-        <TransactionRow type={TransactionType.THRESHOLD} showButtons={true} showChevron={true} />
-
-        <TransactionRow
-          type={TransactionType.ADD_SIGNER}
-          signers={["0xd...s78", "0xe...aK8"]}
-          status="success"
-          showButtons={false}
-          showChevron={false}
-          showExternalLink={true}
-        />
-
-        <TransactionRow
-          type={TransactionType.BATCH}
-          status="success"
-          showButtons={false}
-          showChevron={false}
-          showExternalLink={true}
-        />
-
-        <TransactionRow
-          type={TransactionType.REMOVE_SIGNER}
-          signers={["0xB...bf8", "0xE...aS5"]}
-          status="failed"
-          showButtons={false}
-          showChevron={false}
-          showExternalLink={true}
-        />
-      </div>
+      {loading ? (
+        <span>Loading wallet data...</span>
+      ) : (
+        <div className="content-stretch flex flex-col gap-0.5 items-start justify-start relative size-full">
+          {pendingMessages.length > 0 ? (
+            pendingMessages.map(message => <TransactionRow key={message.id} loading={loading} {...getTransactionProps(message)} />)
+          ) : (
+            <div className="text-gray-500 text-center py-8">No pending transactions</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

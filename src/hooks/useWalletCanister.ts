@@ -1,0 +1,1 @@
+export { useWalletCanister } from '@/contexts/WalletCanisterContext';

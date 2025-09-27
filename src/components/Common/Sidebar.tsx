@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AccountSidebar from "../Account/AccountSidebar";
+import { useInternetIdentity } from "@/contexts/InternetIdentityContext";
 
 export const ACCOUNT_SIDEBAR_OFFSET = 285; // Main sidebar width
 export const NEW_SUB_ACCOUNT_SIDEBAR_OFFSET = 567; // Account sidebar width + gap
@@ -13,6 +14,7 @@ const SIDEBAR_LINKS = {
   SWAP: "/swap",
   TRANSACTIONS: "/transactions",
   BATCH: "/batch",
+  VETKEYS: "/vetkeys",
 };
 
 const sectionItems = [
@@ -23,6 +25,7 @@ const sectionItems = [
       { icon: "/sidebar/dashboard.svg", label: "dashboard", link: SIDEBAR_LINKS.DASHBOARD },
       { icon: "/sidebar/address-book.svg", label: "address book", link: SIDEBAR_LINKS.ADDRESS_BOOK },
       { icon: "/sidebar/ai-assistant.svg", label: "ai assistant", link: SIDEBAR_LINKS.AI_ASSISTANT },
+      { icon: "/logo/icp-avatar.svg", label: "Vetkey", link: SIDEBAR_LINKS.VETKEYS },
     ],
   },
   {
@@ -124,6 +127,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [showAccountSidebar, setShowAccountSidebar] = useState(false);
+  const router = useRouter();
+  const { principal } = useInternetIdentity();
 
   const handleItemClick = (itemLabel: string) => {
     setSelectedItem(itemLabel);
@@ -143,7 +148,7 @@ export default function Sidebar() {
       <div className="bg-background relative rounded-lg h-screen min-w-[280px] max-w-[280px] justify-between flex flex-col z-30 border border-[#EDEDED]">
         <div className="p-3">
           {/* Header */}
-          <div className="flex flex-row items-center gap-3">
+          <div className="flex flex-row items-center gap-3" onClick={() => router.push('/')}>
             <img src="/logo/q3x-logo-icon.svg" alt="logo" className="w-8 h-8" />
             <img src="/logo/q3x-text.svg" alt="logo" className="scale-110" />
             <div className="flex flex-row items-center justify-center rounded-full px-3 py-1 bg-divider">
@@ -191,8 +196,8 @@ export default function Sidebar() {
             >
               <div className="flex flex-row items-center gap-2">
                 <img src="/logo/icp-avatar.svg" alt="account" className="w-5 h-5" />
-                <span className="text-text-secondary">0xBB...37e</span>
-                <img src="/misc/copy-icon.svg" alt="copy" className="w-4 h-4" />
+                <span className="text-text-secondary">{principal ? principal.slice(0, 6) + "..." + principal.slice(-4) : "Not connected"}</span>
+                {/* <img src="/misc/copy-icon.svg" alt="copy" className="w-4 h-4" /> */}
               </div>
               <img src="/misc/power-button-icon.svg" alt="logout" className="w-5 h-5" />
             </div>

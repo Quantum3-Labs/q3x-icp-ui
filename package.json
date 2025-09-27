@@ -9,6 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dfinity/agent": "^3.2.6",
+    "@dfinity/auth-client": "^3.2.6",
+    "@dfinity/candid": "^3.2.6",
+    "@dfinity/identity": "^3.2.6",
+    "@dfinity/ledger-icp": "^6.0.0",
+    "@dfinity/principal": "^3.2.6",
+    "@dfinity/utils": "^3.1.0",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",

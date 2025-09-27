@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { AccountCard } from "./AccountCard";
 import SubAccountSidebar from "./SubAccountSidebar";
 import { ACCOUNT_SIDEBAR_OFFSET, NEW_SUB_ACCOUNT_SIDEBAR_OFFSET } from "../Common/Sidebar";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { getWalletByCanisterId, getWalletsByPrincipal, Wallet } from "@/services/api";
+import { useInternetIdentity } from "@/contexts/InternetIdentityContext";
+import { getAccountAddressFromPrincipal } from "@/utils/helper";
+import { useCurrentWallet } from "@/contexts/CurrentWalletContext";
+import { DEFAULT_CANISTER } from "@/constants";
 
 interface AccountSidebarProps {
   isOpen: boolean;
@@ -41,6 +47,53 @@ const mainAccountNetworks = [
 
 export default function AccountSidebar({ isOpen, onClose }: AccountSidebarProps) {
   const [showSubAccountSidebar, setShowSubAccountSidebar] = useState(false);
+  const { identity, principal } = useInternetIdentity();
+  const walletData = useCurrentWallet();
+
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  // const [walletData, setWalletData] = useState<Wallet | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+    const pathname = usePathname();
+  const canisterIdFromUrl = searchParams.get("canisterid");
+  // const isCreatedAccount = searchParams.get("newaccount") === "true";
+  const isCreatedAccount = searchParams.get("newaccount");
+
+  const handleSwitchWallet = (wallet: Wallet) => {
+    // setCurrentWallet(wallet);
+    router.push(`/dashboard?canisterid=${wallet.canisterId}`);
+    onClose();
+  };
+
+  useEffect(() => {
+    const fetchWallets = async () => {
+      try {
+        // Test 1: Get wallets by principal
+        const userWallets = await getWalletsByPrincipal(
+          principal || "qjbyu-hhb4t-poq3n-wzgxn-uqj55-dn4om-2y4hk-iif7k-vrhum-xjgcb-oqe",
+        );
+        setWallets(userWallets);
+        const firstWallet = userWallets[0] || null;
+        console.log("🚀 ~ fetchWallets ~ isCreatedAccount:", isCreatedAccount)
+        if (principal && pathname.startsWith("/dashboard") && (canisterIdFromUrl || firstWallet?.canisterId)) {
+          router.push(`/dashboard?canisterid=${canisterIdFromUrl || firstWallet?.canisterId}`);
+        }
+      } catch (error) {
+        console.error("API Test Error:", error);
+      }
+    };
+
+    fetchWallets();
+  }, [principal, isCreatedAccount]);
+
+  // useEffect(() => {
+  //   const getWallet = async () => {
+  //     if (!canisterIdFromUrl) return;
+  //     const wallet = await getWalletByCanisterId(canisterIdFromUrl);
+  //     // setWalletData(wallet);
+  //   };
+  //   getWallet();
+  // }, [canisterIdFromUrl]);
 
   // Close sub-account sidebar when main sidebar closes
   useEffect(() => {
@@ -68,17 +121,51 @@ export default function AccountSidebar({ isOpen, onClose }: AccountSidebarProps)
         </header>
 
         <button className="flex justify-center items-center px-5 py-2 w-full text-base font-semibold text-center rounded-xl shadow bg-primary border border-[#3151D3]">
-          <span className="text-white">Create new account</span>
+          <span
+            className="text-white"
+            onClick={() => {
+              onClose();
+              router.push("/dashboard/new-account");
+            }}
+          >
+            Create new account
+          </span>
         </button>
 
         <AccountCard
+          key={canisterIdFromUrl || "default-account"}
+          accountName={walletData?.name || "Default Account"}
+          accountAddress={`${getAccountAddressFromPrincipal(walletData?.canisterId || "").slice(
+            0,
+            8,
+          )}...${getAccountAddressFromPrincipal(walletData?.canisterId || "").slice(-8)}`}
+          accountIcon="/account/default-avatar.svg"
+          isCurrentAccount={true}
+        />
+        {wallets.map(wallet => {
+          if (wallet.canisterId === walletData?.canisterId) return null;
+          return (
+            <AccountCard
+              key={wallet.canisterId}
+              accountName={wallet.name}
+              accountAddress={`${getAccountAddressFromPrincipal(wallet.canisterId || DEFAULT_CANISTER).slice(
+                0,
+                8,
+              )}...${getAccountAddressFromPrincipal(wallet.canisterId || DEFAULT_CANISTER).slice(-8)}`}
+              accountIcon="/account/default-avatar.svg"
+              isCurrentAccount={false}
+              onSwitchClick={() => handleSwitchWallet(wallet)}
+            />
+          );
+        })}
+        {/* <AccountCard
           accountName="Account 1"
           accountAddress="0xB...37e"
           accountIcon="/account/default-avatar.svg"
-          networks={mainAccountNetworks}
-          showSubAccountButton={true}
-          onSubAccountClick={() => setShowSubAccountSidebar(true)}
-        />
+          // networks={mainAccountNetworks}
+          // showSubAccountButton={true}
+          // onSubAccountClick={() => setShowSubAccountSidebar(true)}
+        /> */}
       </div>
 
       <SubAccountSidebar

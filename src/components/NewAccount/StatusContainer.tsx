@@ -1,19 +1,30 @@
 "use client";
 
 import React from "react";
+import { SignerData, WalletData } from "./NewAccountContainer";
 
 interface StatusContainerProps {
   accountName?: string;
   currentStep?: number;
-  onNextStep?: () => void;
   className?: string;
+  walletData?: WalletData;
+  onCreateWallet?: () => void;
+  loading?: boolean;
+  isCreating?: boolean;
+  createError?: string | null;
+  createSuccess?: boolean;
 }
 
 const StatusContainer: React.FC<StatusContainerProps> = ({
   accountName = "Your account name",
   currentStep = 1,
-  onNextStep,
   className,
+  walletData = { signers: [], threshold: 1 },
+  onCreateWallet = () => {},
+  loading = false,
+  isCreating = false,
+  createError = null,
+  createSuccess = false,
 }) => {
   return (
     <div
@@ -22,22 +33,34 @@ const StatusContainer: React.FC<StatusContainerProps> = ({
       <div className="px-5 flex flex-col h-full justify-center gap-2 py-2">
         {/* Step Indicators */}
         <div className="flex gap-[5px] items-end justify-start">
-          {/* Step 1 - Active */}
-          <div className="bg-[#0059ff] h-8 relative rounded-[19px] w-[100px] border border-white shadow-[0px_0px_4px_0px_rgba(90,90,90,0.25)]">
+          {/* Step 1 */}
+          <div
+            className={`h-8 relative rounded-[19px] w-[100px] border border-white shadow-[0px_0px_4px_0px_rgba(90,90,90,0.25)] ${
+              currentStep === 1 ? "bg-[#0059ff]" : "bg-[#4CAF50]"
+            }`}
+          >
             <div className="absolute font-bold leading-[0] left-1/2 top-1/2 not-italic text-[20px] text-center text-white tracking-[-0.4px] translate-x-[-50%] translate-y-[-50%] w-[29.296px]">
-              1
+              {currentStep === 1 ? "1" : "✓"}
             </div>
           </div>
 
-          {/* Step 2 - Inactive */}
-          <div className="bg-[#e0e0e0] opacity-50 relative rounded-[19px] w-8 h-8 border border-white shadow-[0px_0px_4px_0px_rgba(90,90,90,0.25)]">
-            <div className="absolute font-medium leading-[0] left-1/2 top-1/2 not-italic text-[#676767] text-[16px] text-center tracking-[-0.32px] translate-x-[-50%] translate-y-[-50%] w-[29.296px]">
-              2
+          {/* Step 2 */}
+          <div
+            className={`relative rounded-[19px] w-8 h-8 border border-white shadow-[0px_0px_4px_0px_rgba(90,90,90,0.25)] ${
+              currentStep >= 2 ? "bg-[#0059ff]" : "bg-[#e0e0e0] opacity-50"
+            }`}
+          >
+            <div
+              className={`absolute font-medium leading-[0] left-1/2 top-1/2 not-italic text-[16px] text-center tracking-[-0.32px] translate-x-[-50%] translate-y-[-50%] w-[29.296px] ${
+                currentStep >= 2 ? "text-white" : "text-[#676767]"
+              }`}
+            >
+              {currentStep > 2 ? "✓" : "2"}
             </div>
           </div>
         </div>
 
-        {/* Main Status Container */}
+        {/* Account Info Card */}
         <div
           className="rounded-2xl w-full flex flex-col items-center justify-center relative h-[260px] gap-2 overflow-hidden"
           style={{
@@ -47,6 +70,7 @@ const StatusContainer: React.FC<StatusContainerProps> = ({
           }}
         >
           <div className="absolute inset-0 bg-black/10 backdrop-blur" />
+
           {/* Center Icon */}
           <div className="bg-white rounded-[39px] w-[57px] h-[57px] flex items-center justify-center relative z-10">
             <div className="overflow-hidden relative w-[57px] h-[57px] flex items-center justify-center">
@@ -88,7 +112,7 @@ const StatusContainer: React.FC<StatusContainerProps> = ({
 
           {/* Account Type Label */}
           <span className="text-[#545454] text-[16px] text-center uppercase w-[292.94px] max-w-full leading-none z-10 relative mt-5">
-            account name
+            ACCOUNT NAME
           </span>
 
           {/* Account Name Display */}
@@ -97,35 +121,92 @@ const StatusContainer: React.FC<StatusContainerProps> = ({
           </span>
         </div>
 
-        {/*  Main Status Container */}
+        {/* Step Info Section */}
         <div className="bg-[#f7f7f7] rounded-xl w-full border border-[#e0e0e0] flex flex-col flex-1 h-full">
           <div className="overflow-hidden relative w-full h-full flex flex-col">
             {/* Title */}
             <div className="flex flex-col font-semibold justify-center leading-[0] p-4 not-italic text-[#545454] text-[17px] tracking-[-0.51px] uppercase w-full">
-              <span className="leading-none">2. signers & confirmations</span>
+              <span className="leading-none">
+                {currentStep === 1
+                  ? "2. signers & confirmations"
+                  : `2. SIGNERS & CONFIRMATIONS (${walletData.signers.length})`}
+              </span>
             </div>
 
-            {/* Rocket Diagram */}
-            <div className="flex flex-col gap-[11px] items-center justify-center flex-1 w-full">
-              <img src="/account/new-account-icon.svg" alt="Rocket" className="w-[105px] h-[98px]" />
-
-              {/* Status Text */}
-              <div className="flex flex-col justify-center text-[#545454] text-[15px] text-center">
-                Setup on next step
+            {/* Content */}
+            {currentStep === 1 ? (
+              // Step 1 - Placeholder
+              <div className="flex flex-col gap-[11px] items-center justify-center flex-1 w-full">
+                <img src="/account/new-account-icon.svg" alt="Rocket" className="w-[105px] h-[98px]" />
+                <div className="flex flex-col justify-center text-[#545454] text-[15px] text-center">
+                  Setup on next step
+                </div>
               </div>
-            </div>
+            ) : (
+              // Step 2+ - Display Signers Info
+              <div className="flex flex-col gap-3 p-4 flex-1">
+                {walletData.signers.length > 0 ? (
+                  <>
+                    {/* Signers List */}
+                    <div className="flex flex-col gap-2">
+                      {walletData.signers.map((signer, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                          <div className="flex flex-col">
+                            <span className="text-[#545454] text-[14px] font-medium">
+                              {signer.name || `Signer ${index + 1}`}
+                            </span>
+                            <span className="text-[#888888] text-[12px]">{signer.address || "No address"}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Threshold Display */}
+                    <div className="mt-2 p-2 bg-blue-50 rounded border">
+                      <span className="text-[#545454] text-[14px]">
+                        Threshold: <strong>{walletData.threshold}</strong> of{" "}
+                        <strong>{walletData.signers.length}</strong> signers required
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  // No signers yet
+                  <div className="flex flex-col gap-[11px] items-center justify-center flex-1 w-full">
+                    <img src="/account/new-account-icon.svg" alt="Rocket" className="w-[105px] h-[98px]" />
+                    <div className="flex flex-col justify-center text-[#545454] text-[15px] text-center">
+                      Configure signers
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Action Button */}
       <div className="bg-[#f7f7f7] w-full px-5 py-4 border-t border-[#e0e0e0]">
-        <button
-          onClick={onNextStep}
-          className="bg-gradient-to-b from-[#48b3ff] to-[#0059ff] flex items-center justify-center px-5 py-2 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(12,12,106,0.5),0px_0px_0px_1px_#4470ff] w-full opacity-50"
-        >
-          <span className="font-semibold text-[16px] text-center text-white">Create your account</span>
-        </button>
+        {currentStep >= 2 && walletData.signers.length > 0 ? (
+          <button
+            onClick={() => {
+              onCreateWallet();
+            }}
+            disabled={loading}
+            className="bg-gradient-to-b from-[#48b3ff] to-[#0059ff] flex items-center justify-center px-5 py-2 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(12,12,106,0.5),0px_0px_0px_1px_#4470ff] w-full"
+          >
+            <span className="font-semibold text-[16px] text-center text-white">
+              {loading ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              ) : (
+                "Create your account"
+              )}
+            </span>
+          </button>
+        ) : (
+          <button className="bg-gradient-to-b from-[#48b3ff] to-[#0059ff] flex items-center justify-center px-5 py-2 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(12,12,106,0.5),0px_0px_0px_1px_#4470ff] w-full opacity-50 cursor-not-allowed">
+            <span className="font-semibold text-[16px] text-center text-white">Create your account</span>
+          </button>
+        )}
       </div>
     </div>
   );

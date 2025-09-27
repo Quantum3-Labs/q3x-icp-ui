@@ -2,9 +2,20 @@
 
 import React, { useState } from "react";
 
-export default function Account({ className }: { className?: string }) {
-  const [showAddressTooltip, setShowAddressTooltip] = useState(false);
+interface AccountProps {
+  className?: string;
+  onAccountNameChange: (name: string) => void;
+  onNextStep: () => void;
+  accountName: string;
+}
 
+export default function Account({ 
+  className, 
+  onAccountNameChange, 
+  onNextStep, 
+  accountName 
+}: AccountProps) {
+  const [showAddressTooltip, setShowAddressTooltip] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<{
     id: string;
     name: string;
@@ -15,12 +26,19 @@ export default function Account({ className }: { className?: string }) {
 
   const handleAddressSelect = (address: any) => {
     setSelectedAddress(address);
-    setAddress(address.address);
+    onAccountNameChange(address.address);
     setShowAddressTooltip(false);
   };
 
-  const [amount, setAmount] = useState("");
-  const [address, setAddress] = useState("");
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onAccountNameChange(e.target.value);
+  };
+
+  const handleNextClick = () => {
+    if (accountName.trim()) {
+      onNextStep();
+    }
+  };
 
   return (
     <div
@@ -36,7 +54,7 @@ export default function Account({ className }: { className?: string }) {
 
       {/* Main content */}
       <div className="flex flex-col gap-[20px] items-center justify-center flex-1 px-4 relative z-10">
-        {/* Title section */}
+        {/* Title section - unchanged */}
         <div className="flex flex-col items-center justify-center pb-8">
           <div className="text-[#545454] text-6xl text-center font-bold uppercase w-full">create new</div>
           <div className="flex gap-[5px] items-center justify-center w-full">
@@ -45,6 +63,7 @@ export default function Account({ className }: { className?: string }) {
             <div className="text-[#545454] text-6xl text-center font-bold uppercase">unt</div>
           </div>
         </div>
+
         {/* Basic setup */}
         <div className="flex items-center justify-center w-full max-w-2xl flex-col text-center">
           <span className="text-text-primary uppercase text-[26px] font-bold">1. Basic setup</span>
@@ -63,8 +82,8 @@ export default function Account({ className }: { className?: string }) {
               <input
                 type="text"
                 placeholder="Your account name"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
+                value={accountName}
+                onChange={handleInputChange}
                 className="text-text-secondary text-[16px] outline-none placeholder:text-text-secondary flex-3"
               />
               {selectedAddress?.name && (
@@ -85,8 +104,18 @@ export default function Account({ className }: { className?: string }) {
 
         {/* Action buttons */}
         <div className="flex gap-2 items-center justify-center w-full max-w-xs">
-          <button className="bg-gradient-to-b from-[#48b3ff] to-[#0059ff] flex items-center justify-center px-5 py-2 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(12,12,106,0.5),0px_0px_0px_1px_#4470ff]">
-            <span className="font-semibold text-[16px] text-center text-white tracking-[-0.16px]">Next Step</span>
+          <button 
+            onClick={handleNextClick}
+            disabled={!accountName.trim()}
+            className={`flex items-center justify-center px-5 py-2 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(12,12,106,0.5),0px_0px_0px_1px_#4470ff] ${
+              accountName.trim() 
+                ? 'bg-gradient-to-b from-[#48b3ff] to-[#0059ff]' 
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <span className="font-semibold text-[16px] text-center text-white tracking-[-0.16px]">
+              Next Step
+            </span>
           </button>
         </div>
       </div>

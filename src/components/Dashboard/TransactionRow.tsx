@@ -11,31 +11,41 @@ export enum TransactionType {
 }
 
 interface TransactionRowProps {
+  loading?: boolean;
   type: TransactionType;
   amount?: string;
   to?: string;
-  threshold?: string;
+  oldThreshold?: number;
+  newThreshold?: string;
   signers?: string[];
+  approveNumber?: number;
   status?: "success" | "failed";
+  isApproved?: boolean;
   showButtons?: boolean;
   showChevron?: boolean;
   showExternalLink?: boolean;
+  onApprove?: () => void;
 }
 
 export default function TransactionRow({
+  loading = false,
   type,
   amount,
   to,
-  threshold,
+  oldThreshold,
+  newThreshold,
   signers,
+  approveNumber,
   status,
+  isApproved,
   showButtons = true,
   showChevron = true,
   showExternalLink = false,
+  onApprove,
 }: TransactionRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  const isExpandable = type === TransactionType.ADD_SIGNER || type === TransactionType.BATCH;
+  const isExpandable = false; // TODO: will show expanded content for certain types
 
   const handleToggleExpand = () => {
     if (isExpandable) {
@@ -54,7 +64,7 @@ export default function TransactionRow({
                 isActive ? "text-white" : ""
               }`}
             >
-              03
+              {oldThreshold}
             </span>
             <img src="/arrow/thin-long-arrow-right.svg" alt="chevron" className="w-15" />
             <span
@@ -62,7 +72,7 @@ export default function TransactionRow({
                 isActive ? "text-white" : ""
               }`}
             >
-              05
+              {newThreshold}
             </span>
           </>
         );
@@ -274,11 +284,20 @@ export default function TransactionRow({
 
           {showButtons && (
             <div className="flex items-center gap-[7px] shrink-0">
-              <div className="bg-gradient-to-b from-[#f0f0f0] to-[#b0b0b0] flex items-center justify-center px-5 py-1.5 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(131,131,131,0.5),0px_0px_0px_1px_#c6c6c6]">
+              {/* <div className="bg-gradient-to-b from-[#f0f0f0] to-[#b0b0b0] flex items-center justify-center px-5 py-1.5 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(131,131,131,0.5),0px_0px_0px_1px_#c6c6c6]">
                 <span className="font-medium text-[#676767] text-sm text-center">Deny</span>
+              </div> */}
+              <div>
+                {approveNumber} / {oldThreshold}
               </div>
               <div className="bg-gradient-to-b from-[#9c9c9c] to-[#303030] flex items-center px-5 py-1.5 rounded-[10px] shadow-[0px_2px_4px_-1px_rgba(131,131,131,0.5),0px_0px_0px_1px_#a1a1a1]">
-                <span className="font-medium text-white text-sm text-center">Approve</span>
+                {loading ? (
+                  <span>Loading...</span>
+                ) : (
+                  <span className="font-medium text-white text-sm text-center" onClick={onApprove}>
+                    {isApproved ? "Approved" : "Approve"}
+                  </span>
+                )}
               </div>
             </div>
           )}

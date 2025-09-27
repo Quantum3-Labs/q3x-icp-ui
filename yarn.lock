@@ -7,6 +7,53 @@
   resolved "https://registry.yarnpkg.com/@alloc/quick-lru/-/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
   integrity sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==
 
+"@dfinity/agent@^3.2.6":
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/@dfinity/agent/-/agent-3.2.6.tgz#67347ea813cc07cd2dd1a25b3c748a931e76a666"
+  integrity sha512-rJscQptoa43BxHgpeyy9qF6JbAXm4tn+IeNkUE9aMn60tfy1SGizMn6UQQOmw7jvl+LYDVA6w8ZA7c2br3cM+w==
+  dependencies:
+    "@dfinity/cbor" "^0.2.2"
+    "@noble/curves" "^1.9.2"
+
+"@dfinity/auth-client@^3.2.6":
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/@dfinity/auth-client/-/auth-client-3.2.6.tgz#247cd25541d166492db1a444bdc32bd9561fb857"
+  integrity sha512-uuo72wai9Mg5CglZ3VE9eIUibttPvFn2B7LmMFoBenT9md2d57aBUdKFep1fkHNvD4Kp4iLxOfs1UEKQX7vbog==
+  dependencies:
+    idb "^7.0.2"
+
+"@dfinity/candid@^3.2.6":
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/@dfinity/candid/-/candid-3.2.6.tgz#9680a3057894e53ac1cef096325ce328874b937b"
+  integrity sha512-rh26bUluupegJNiDC6pJy0wyhkctPJSJ5ue4RxnodrbA6YMyQoj7m8Ic3Y81ah/fsSXOl9AIyyVh3kMqZb3lSw==
+
+"@dfinity/cbor@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@dfinity/cbor/-/cbor-0.2.2.tgz#4f31f4f0c1aeb0c8179edd99625180a76a5b43e0"
+  integrity sha512-GPJpH73kDEKbUBdUjY80lz7cq9l0vm1h/7ppejPV6O0ZTqCLrYspssYvqjRmK4aNnJ/SKXsP0rg9LYX7zpegaA==
+
+"@dfinity/identity@^3.2.6":
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/@dfinity/identity/-/identity-3.2.6.tgz#938b81ce2447a644d1ed0e0463cef239064df2dd"
+  integrity sha512-18ecTwtz4Yv8coaNM4ooCzqlib9ooP20JFHJ2RVAtlWPaVcRC/4nzXTEJiUH+TytC7ZbBkuRYlJ/eLeIhyYqaA==
+
+"@dfinity/ledger-icp@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@dfinity/ledger-icp/-/ledger-icp-6.0.0.tgz#8f08b661fd795962bb4ff6eb6bba8471137568f4"
+  integrity sha512-PoS8fwJuOJIRX6Coaq+tZJJ553IW++7CVFmR0OdHBE5fmvJEJ2ID2hARcKkyf1vvTCu8uOeIVWQ3hJA1AA0bSg==
+
+"@dfinity/principal@^3.2.6":
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/@dfinity/principal/-/principal-3.2.6.tgz#0e764f587e0679f717de2d0e26211d8ee8f69aac"
+  integrity sha512-jxEmMwZe2k/XC0DEW1i7CVJ/vPzIKT0zvXeQIBuvkfEcqWSVRiScHlURwnYStQAE1RVP8glDEs6ioeZgmEmazA==
+  dependencies:
+    "@noble/hashes" "^1.8.0"
+
+"@dfinity/utils@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@dfinity/utils/-/utils-3.1.0.tgz#b8265a59248114561976f7140df208e42311d8b8"
+  integrity sha512-e4Iunp147nN/gpph/7miZkxwYkctA3AyuKla0vbwK9RNJE7Rub43Zwo0mlhjYq6WHjIxIEL/8n+AAJj9+RjZcw==
+
 "@emnapi/core@^1.4.3", "@emnapi/core@^1.4.5":
   version "1.4.5"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.5.tgz#bfbb0cbbbb9f96ec4e2c4fd917b7bbe5495ceccb"
@@ -374,6 +421,18 @@
   version "15.5.2"
   resolved "https://registry.yarnpkg.com/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-15.5.2.tgz#9237d40b82eaf2efc88baeba15b784d4126caf4a"
   integrity sha512-W5VvyZHnxG/2ukhZF/9Ikdra5fdNftxI6ybeVKYvBPDtyx7x4jPPSNduUkfH5fo3zG0JQ0bPxgy41af2JX5D4Q==
+
+"@noble/curves@^1.9.2":
+  version "1.9.7"
+  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.9.7.tgz#79d04b4758a43e4bca2cbdc62e7771352fa6b951"
+  integrity sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==
+  dependencies:
+    "@noble/hashes" "1.8.0"
+
+"@noble/hashes@1.8.0", "@noble/hashes@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.8.0.tgz#cee43d801fcef9644b11b8194857695acd5f815a"
+  integrity sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1736,6 +1795,11 @@ hasown@^2.0.2:
   integrity sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==
   dependencies:
     function-bind "^1.1.2"
+
+idb@^7.0.2:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/idb/-/idb-7.1.1.tgz#d910ded866d32c7ced9befc5bfdf36f572ced72b"
+  integrity sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==
 
 ignore@^5.2.0:
   version "5.3.2"
